@@ -1,32 +1,69 @@
-# React + TypeScript + Vite
+# Aurex Player
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A modern, lightweight, high-performance media player for Windows, built with [Tauri](https://tauri.app), React, and [mpv](https://mpv.io). Designed to feel premium on both low-end and high-end PCs.
 
-Currently, two official plugins are available:
+## Download
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Grab the latest installer from the [Releases page](https://github.com/huzzah295/Aurex-Player/releases/latest) — download `Aurex.Player_x.x.x_x64-setup.exe` and run it. No other setup required.
 
-## React Compiler
+The app checks for updates on its own (Settings → Updates), so you'll always be notified when a new version is available.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Features
 
-## Expanding the Oxlint configuration
+- **Broad format support** — MP4, MKV, AVI, MOV, WMV, FLV, WebM, MPEG/MPG, TS video, and MP3, WAV, FLAC, AAC, OGG, Opus, M4A audio, powered by mpv.
+- **Six themes** — Dark, Light, OLED Black, Liquid Glass, Midnight Blue, and Sunset, each with 5 accent colors and optional dynamic accent tinting from the video itself.
+- **10-band equalizer** with built-in presets (Flat, Cinema, Music, Podcast, Rock, Pop, Bass Boost, Treble Boost, Vocal Boost) and custom saved presets.
+- **Video adjustments** — brightness, contrast, saturation, gamma, and hue, live while playing.
+- **Fullscreen playback** with auto-hiding controls: the transport bar fades out after 3 seconds of inactivity and reappears instantly on mouse movement, clicks, scrolling, or a keyboard shortcut — never while you're actively using the seek bar, volume slider, or any popup.
+- **Resume playback** — picks up where you left off on a file you've already watched.
+- **Fully remappable keyboard shortcuts**, cache management, and a repair-mode settings panel to reset any part of the app that misbehaves.
+- **File associations** so double-clicking a supported media file in Explorer opens it directly in Aurex Player.
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+### Default keyboard shortcuts
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
+| Action | Shortcut |
+|---|---|
+| Play / Pause | `Space` |
+| Seek Backward / Forward | `←` / `→` |
+| Volume Up / Down | `↑` / `↓` |
+| Mute | `M` |
+| Fullscreen | `F` |
+| Next / Previous Track | `Ctrl + →` / `Ctrl + ←` |
+| Cycle Repeat Mode | `R` |
+| Shuffle | `S` |
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+All shortcuts are rebindable from Settings → Shortcuts.
+
+## Tech stack
+
+- [Tauri 2](https://tauri.app) (Rust backend, native Windows window/shell integration)
+- [React 19](https://react.dev) + [TypeScript](https://www.typescriptlang.org)
+- [Tailwind CSS v4](https://tailwindcss.com) + [Framer Motion](https://motion.dev)
+- [Zustand](https://github.com/pmndrs/zustand) for state
+- [mpv](https://mpv.io) as the playback engine, embedded as a native child window
+
+## Building from source
+
+1. Install [Node.js](https://nodejs.org), [Rust](https://www.rust-lang.org/tools/install), and the [Tauri prerequisites](https://tauri.app/start/prerequisites/) for Windows.
+2. Download an mpv Windows build (e.g. from [shinchiro/mpv-winbuild-cmake](https://github.com/shinchiro/mpv-winbuild-cmake/releases)) and place the executable at `src-tauri/binaries/mpv-x86_64-pc-windows-msvc.exe` (it's excluded from this repo — see `.gitignore` — since it's a 100MB+ third-party binary, not source code).
+3. Install dependencies:
+   ```
+   npm install
+   ```
+4. Run in development:
+   ```
+   npm run tauri dev
+   ```
+5. Build a release installer:
+   ```
+   npm run tauri build
+   ```
+   The `.exe` installer is produced at `src-tauri/target/release/bundle/nsis/`.
+
+## License
+
+Aurex Player is licensed under the [MIT License](LICENSE).
+
+## Author
+
+Created by Muhammad Huzaifa Saeed.
