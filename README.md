@@ -62,7 +62,7 @@ All shortcuts are rebindable from Settings → Shortcuts.
 
 ## License
 
-Aurex Player is licensed under the [MIT License](LICENSE).
+The compiled app (available on the [Releases page](https://github.com/huzzah295/Aurex-Player/releases/latest)) is free to download and use. The source code in this repository is shared for transparency only - it is **not** open source, and reuse, modification, or redistribution of the code is not permitted without permission. See [LICENSE](LICENSE) for the full terms.
 
 ## Author
 
