@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
+import { useSettingsStore } from "../../stores/settingsStore";
+import { useUpdateStore, type UpdateInfo } from "../../stores/updateStore";
+import { ToggleField } from "../ui/Toggle";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -15,18 +18,21 @@ const gridItem: Variants = {
 
 type Status = "idle" | "checking" | "upToDate" | "available" | "downloading" | "error";
 
-interface UpdateInfo {
-  currentVersion: string;
-  latestVersion: string;
-  upToDate: boolean;
-  downloadUrl: string | null;
-  releaseUrl: string;
+/** Turns a shared store result (from a background check, or none yet) into this panel's initial status. */
+function statusFromStoredInfo(info: UpdateInfo | null): Status {
+  if (!info) return "idle";
+  return info.upToDate ? "upToDate" : "available";
 }
 
 export function UpdateSettings() {
-  const [status, setStatus] = useState<Status>("idle");
-  const [info, setInfo] = useState<UpdateInfo | null>(null);
+  // Seeded from the shared store so a background check's result (see
+  // useAutoUpdateCheck) is already on screen the moment this tab opens,
+  // instead of showing "idle" until the user clicks Check for Updates again.
+  const [status, setStatus] = useState<Status>(() => statusFromStoredInfo(useUpdateStore.getState().info));
+  const [info, setInfo] = useState(() => useUpdateStore.getState().info);
   const [errorMessage, setErrorMessage] = useState("");
+  const autoCheckForUpdates = useSettingsStore((s) => s.autoCheckForUpdates);
+  const setAutoCheckForUpdates = useSettingsStore((s) => s.setAutoCheckForUpdates);
 
   const handleCheck = async () => {
     if (!isTauri) return;
@@ -36,6 +42,7 @@ export function UpdateSettings() {
       const { invoke } = await import("@tauri-apps/api/core");
       const result = await invoke<UpdateInfo>("check_for_update");
       setInfo(result);
+      useUpdateStore.getState().setInfo(result);
       setStatus(result.upToDate ? "upToDate" : "available");
     } catch (err) {
       setErrorMessage(String(err));
@@ -66,6 +73,12 @@ export function UpdateSettings() {
         <VersionRow label="Current Version" value={info?.currentVersion ?? "—"} />
         <VersionRow label="Latest Version" value={info?.latestVersion ?? "—"} />
       </motion.div>
+
+      <ToggleField
+        label="Automatically check for updates on launch"
+        checked={autoCheckForUpdates}
+        onChange={setAutoCheckForUpdates}
+      />
 
       <div className="flex flex-col gap-2">
         <button

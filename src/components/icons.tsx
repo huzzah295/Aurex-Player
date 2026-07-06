@@ -278,3 +278,13 @@ export function CloseIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function UpdateAvailableIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className} aria-hidden="true">
+      <path d="M12 3v11" />
+      <path d="m7 10 5 5 5-5" />
+      <path d="M4 19h16" />
+    </svg>
+  );
+}

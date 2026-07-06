@@ -13,6 +13,7 @@ import { useOpenFileFromOS } from "./hooks/useOpenFileFromOS";
 import { useSurfaceInput } from "./hooks/useSurfaceInput";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useFullscreenChrome } from "./hooks/useFullscreenChrome";
+import { useAutoUpdateCheck } from "./hooks/useAutoUpdateCheck";
 import { adjustVolumeByNotches } from "./lib/volume";
 
 function App() {
@@ -50,6 +51,7 @@ function App() {
   useOpenFileFromOS();
   useSurfaceInput();
   useFullscreenChrome();
+  useAutoUpdateCheck();
   // Suspended while Settings is open so the shortcut-rebind capture there
   // doesn't fight with global shortcuts also reacting to the same keypress.
   useKeyboardShortcuts(settingsTab !== null);
@@ -76,6 +78,7 @@ function App() {
           onOpenShortcuts={() => setSettingsTab("shortcuts")}
           onOpenEqualizer={() => setSettingsTab("equalizer")}
           onOpenAbout={() => setSettingsTab("about")}
+          onOpenUpdates={() => setSettingsTab("updates")}
         />
       )}
       <VideoSurface />

@@ -14,6 +14,7 @@ interface Persisted {
   lastOpenedFolder: string | null;
   dynamicAccentEnabled: boolean;
   showAdvancedSettings: boolean;
+  autoCheckForUpdates: boolean;
 }
 
 interface SettingsStore extends Persisted {
@@ -28,6 +29,7 @@ interface SettingsStore extends Persisted {
   resetOnboarding: () => void;
   setDynamicAccentEnabled: (enabled: boolean) => void;
   setShowAdvancedSettings: (show: boolean) => void;
+  setAutoCheckForUpdates: (enabled: boolean) => void;
 }
 
 const STORAGE_KEY = "aurex-settings";
@@ -41,6 +43,7 @@ const DEFAULTS: Persisted = {
   lastOpenedFolder: null,
   dynamicAccentEnabled: false,
   showAdvancedSettings: false,
+  autoCheckForUpdates: true,
 };
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -209,5 +212,10 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   setShowAdvancedSettings: (showAdvancedSettings) => {
     set({ showAdvancedSettings });
     persist({ ...get(), showAdvancedSettings });
+  },
+
+  setAutoCheckForUpdates: (autoCheckForUpdates) => {
+    set({ autoCheckForUpdates });
+    persist({ ...get(), autoCheckForUpdates });
   },
 }));

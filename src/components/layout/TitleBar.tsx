@@ -14,9 +14,10 @@ interface TitleBarProps {
   onOpenShortcuts: () => void;
   onOpenEqualizer: () => void;
   onOpenAbout: () => void;
+  onOpenUpdates: () => void;
 }
 
-export function TitleBar({ onOpenSettings, onOpenShortcuts, onOpenEqualizer, onOpenAbout }: TitleBarProps) {
+export function TitleBar({ onOpenSettings, onOpenShortcuts, onOpenEqualizer, onOpenAbout, onOpenUpdates }: TitleBarProps) {
   const [maximized, setMaximized] = useState(false);
 
   useEffect(() => {
@@ -53,6 +54,7 @@ export function TitleBar({ onOpenSettings, onOpenShortcuts, onOpenEqualizer, onO
           onOpenShortcuts={onOpenShortcuts}
           onOpenEqualizer={onOpenEqualizer}
           onOpenAbout={onOpenAbout}
+          onOpenUpdates={onOpenUpdates}
         />
         <div data-tauri-drag-region className="flex h-9 flex-1 items-center gap-2 pl-1 pr-3 text-[rgb(var(--text-muted))]">
           <span className="h-2 w-2 rounded-full bg-[rgb(var(--accent))]" />
