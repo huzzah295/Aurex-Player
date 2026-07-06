@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aurex Player</title>
+    <style>
+      /* Static markup + CSS only, rendered before React (or even the module
+         script) has parsed - the fastest possible paint for the main
+         window's brief startup gap. Colors match the default dark theme so
+         there's no jarring flash for most users; App.tsx fades this out and
+         removes it once the real UI has mounted. */
+      #aurex-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        background: rgb(15 16 20);
+        color: rgb(236 237 240);
+        font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+        transition: opacity 200ms ease;
+      }
+      #aurex-splash.aurex-splash-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .aurex-splash-mark {
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+      .aurex-splash-spinner {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 2px solid rgb(42 44 52);
+        border-top-color: rgb(79 125 255);
+        animation: aurex-splash-spin 0.8s linear infinite;
+      }
+      @keyframes aurex-splash-spin {
+        to { transform: rotate(360deg); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .aurex-splash-spinner { animation: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="aurex-splash">
+      <div class="aurex-splash-mark">Aurex Player</div>
+      <div class="aurex-splash-spinner"></div>
+    </div>
+    <div id="root"></div>
+    <script>
+      // This same index.html is shared by every window (main, the
+      // video-adjust popover, the fullscreen control bar - see main.tsx) -
+      // the splash only makes sense for the main window's startup, so it's
+      // removed immediately for any other window. window.__TAURI_INTERNALS__
+      // is injected before page scripts run, so the label is already
+      // available here synchronously, unlike the async getCurrentWindow()
+      // API used elsewhere.
+      (function () {
+        var internals = window.__TAURI_INTERNALS__;
+        var isMain = !internals || internals.metadata.currentWindow.label === "main";
+        if (!isMain) {
+          var splash = document.getElementById("aurex-splash");
+          if (splash) splash.remove();
+        }
+      })();
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

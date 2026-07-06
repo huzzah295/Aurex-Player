@@ -1,0 +1,406 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Segoe UI", system-ui, sans-serif;
+}
+
+:root {
+  --accent: 79 125 255;
+  --bg: 15 16 20;
+  --bg-elevated: 24 25 31;
+  --bg-hover: 34 36 43;
+  --border: 42 44 52;
+  --text: 236 237 240;
+  --text-muted: 150 153 163;
+  /* Surface translucency/blur knobs, consumed by .glass-panel below. 1 /
+     0px for every existing theme means .glass-panel renders pixel-identical
+     to a plain opaque bg-elevated surface for them - only the "glass" theme
+     overrides these to anything visible. */
+  --surface-alpha: 1;
+  --surface-blur: 0px;
+  --surface-saturate: 100%;
+  /* Semantic status colors for error/success text (CacheManager, Repair,
+     Updates, playback error banner, etc.) - tuned for dark backgrounds by
+     default. Light-family themes below override these to darker, more
+     saturated shades; a plain Tailwind red-400/green-400 (as used against a
+     near-black background) drops to ~2.5:1 contrast against a near-white
+     background, well under the 4.5:1 minimum for normal text. */
+  --danger: 248 113 113;
+  --success: 74 222 128;
+}
+
+:root[data-theme="light"] {
+  --bg: 246 247 249;
+  --bg-elevated: 255 255 255;
+  --bg-hover: 234 236 240;
+  --border: 222 225 230;
+  --text: 22 24 29;
+  --text-muted: 100 104 115;
+  --danger: 185 28 28;
+  --success: 21 128 61;
+}
+
+:root[data-theme="oled"] {
+  --bg: 0 0 0;
+  --bg-elevated: 10 10 10;
+  --bg-hover: 20 20 20;
+  --border: 32 32 32;
+  --text: 236 237 240;
+  --text-muted: 150 153 163;
+}
+
+/* Liquid Glass: a fourth, optional theme. Cool-toned dark base so frosted
+   translucent panels have something pleasant to diffuse; depth comes from
+   backdrop-blur + soft edge lighting rather than heavy borders or opaque
+   fills. See .glass-panel / .glass-btn / .aurex-range below for how the
+   surfaces themselves pick this up. */
+:root[data-theme="glass"] {
+  --bg: 10 12 18;
+  --bg-elevated: 26 30 40;
+  --bg-hover: 38 44 56;
+  --border: 100 112 132;
+  --text: 240 242 246;
+  --text-muted: 168 175 190;
+  --surface-alpha: 0.62;
+  --surface-blur: 22px;
+  --surface-saturate: 150%;
+}
+
+/* Midnight Blue: a fifth, solid (non-translucent) dark theme - deep navy
+   instead of the neutral dark theme's gray, for users who want a colder,
+   more saturated dark palette without the glass theme's transparency/blur
+   cost. */
+:root[data-theme="midnight"] {
+  --bg: 8 12 28;
+  --bg-elevated: 16 22 42;
+  --bg-hover: 24 32 56;
+  --border: 38 48 78;
+  --text: 230 235 250;
+  --text-muted: 148 158 185;
+}
+
+/* Sunset: a sixth theme - warm-toned light palette (cream/amber) as an
+   alternative to the neutral Light theme. */
+:root[data-theme="sunset"] {
+  --bg: 253 245 237;
+  --bg-elevated: 255 250 245;
+  --bg-hover: 246 233 220;
+  --border: 232 210 190;
+  --text: 46 30 22;
+  --text-muted: 120 95 80;
+  --danger: 185 28 28;
+  --success: 21 128 61;
+}
+
+/* Respects the OS "reduce transparency" accessibility/performance setting
+   (Windows 11 exposes this; Chromium-based WebView2 reads it) by mostly
+   flattening the glass surfaces to a near-opaque, unblurred panel while
+   keeping the same layout, colors, and rounded shapes - the honest way to
+   "reduce visual intensity on constrained systems" without pretending to
+   detect GPU/CPU tier, which isn't something a webview can actually query.
+   prefers-reduced-motion is already handled globally further down. */
+@media (prefers-reduced-transparency: reduce) {
+  :root[data-theme="glass"] {
+    --surface-alpha: 0.96;
+    --surface-blur: 0px;
+    --surface-saturate: 100%;
+  }
+}
+
+:root[data-accent="purple"] { --accent: 158 110 255; }
+:root[data-accent="green"]  { --accent: 55 199 137; }
+:root[data-accent="orange"] { --accent: 255 149 64; }
+:root[data-accent="red"]    { --accent: 235 87 87; }
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+/* Every clickable control gets a pointer cursor by default - applied here
+   globally rather than per-component, since several buttons across the app
+   had drifted to relying on the browser default (which for <button> is
+   `cursor: default`, not `pointer`), while others added the Tailwind class
+   by hand. One rule keeps all of them consistent, including any added later. */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+[role="menuitem"],
+[role="menuitemcheckbox"] {
+  cursor: pointer;
+}
+
+button:disabled,
+[role="button"][aria-disabled="true"] {
+  cursor: default;
+}
+
+/* A single, subtle press-down for every button in the app - cheaper and far
+   more consistent than adding `active:scale-[...]` by hand to each one.
+   Framer Motion's `whileTap` (used by a few buttons, e.g. the transport
+   bar's play/pause) writes its own inline transform during the gesture,
+   which wins over this class-based rule by CSS specificity, so the two
+   never fight. */
+button:not(:disabled) {
+  transition: transform 120ms ease;
+}
+
+button:not(:disabled):active {
+  transform: scale(0.98);
+}
+
+/* Consistent themed keyboard-focus ring for controls that don't already
+   define their own (range inputs have a bespoke box-shadow ring below -
+   excluded here so the two don't stack). */
+button:focus-visible,
+a:focus-visible,
+[role="menuitem"]:focus-visible,
+[role="menuitemcheckbox"]:focus-visible,
+input[type="checkbox"]:focus-visible,
+input[type="text"]:focus-visible {
+  outline: 2px solid rgb(var(--accent) / 0.6);
+  outline-offset: 2px;
+}
+
+body {
+  margin: 0;
+  background-color: rgb(var(--bg));
+  color: rgb(var(--text));
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  user-select: none;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+/* The video-adjustments overlay window is a separate, transparent,
+   borderless window (see video_adjust_window.rs) - its body must stay
+   see-through outside the rounded panel it renders, instead of the normal
+   opaque app background. */
+:root[data-window="video-adjust-popover"] body {
+  background-color: transparent;
+}
+
+/* Liquid Glass background: soft, accent-tinted ambient glow in two corners
+   for the glass panels to diffuse against, instead of a flat fill. Kept
+   subtle - this is the only place the background itself changes for this
+   theme. */
+:root[data-theme="glass"] body {
+  background:
+    radial-gradient(1100px 760px at 12% -8%, rgb(var(--accent) / 0.16), transparent 60%),
+    radial-gradient(900px 680px at 105% 105%, rgb(var(--accent) / 0.10), transparent 55%),
+    rgb(var(--bg));
+}
+
+/* Shared "floating glass surface" treatment for every panel-like container
+   (titlebar, dropdowns, dialogs, the bottom control bar, popovers). For the
+   three existing themes this is deliberately inert - --surface-alpha: 1 and
+   --surface-blur: 0px above make it render identically to a plain opaque
+   rgb(var(--bg-elevated)) fill, so applying this class everywhere doesn't
+   change Dark/Light/OLED at all. Only under the glass theme does it become
+   a real frosted surface. */
+.glass-panel {
+  background-color: rgb(var(--bg-elevated) / var(--surface-alpha));
+  backdrop-filter: blur(var(--surface-blur)) saturate(var(--surface-saturate));
+  -webkit-backdrop-filter: blur(var(--surface-blur)) saturate(var(--surface-saturate));
+  transition: background-color 200ms ease, border-color 200ms ease;
+}
+
+.glass-btn {
+  transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
+}
+
+:root[data-theme="glass"] .glass-panel {
+  /* Recolors whichever border side(s) the component already declares
+     (border-b, border-t, border, ...) to a soft white edge-light instead
+     of touching border-width/style, so this can't add borders where there
+     weren't any before (e.g. the titlebar's bottom-only border). */
+  border-color: rgb(255 255 255 / 0.1);
+  box-shadow:
+    0 8px 32px rgb(0 0 0 / 0.28),
+    inset 0 1px 0 rgb(255 255 255 / 0.08),
+    inset 0 0 40px rgb(var(--accent) / 0.05);
+}
+
+/* Frosted hover glow for buttons - added alongside each button's existing
+   hover:bg-[...] class, which it simply overrides (higher specificity)
+   under the glass theme; a no-op class otherwise. */
+:root[data-theme="glass"] .glass-btn {
+  transition: background-color 180ms ease, box-shadow 180ms ease, transform 120ms ease;
+}
+
+:root[data-theme="glass"] .glass-btn:hover {
+  background-color: rgb(var(--accent) / 0.14);
+  box-shadow: 0 0 0 1px rgb(var(--accent) / 0.22), 0 0 18px -2px rgb(var(--accent) / 0.45);
+}
+
+:root[data-theme="glass"] .glass-btn:active {
+  transform: scale(0.96);
+}
+
+/* VolumeHud already has its own bespoke translucent background (95% opacity)
+   that already works fine for every existing theme - left untouched here.
+   Glass theme just layers a blur + soft edge on top of it. */
+:root[data-theme="glass"] .volume-hud {
+  backdrop-filter: blur(var(--surface-blur)) saturate(var(--surface-saturate));
+  -webkit-backdrop-filter: blur(var(--surface-blur)) saturate(var(--surface-saturate));
+  border: 1px solid rgb(255 255 255 / 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Custom range slider: thin track with an accent-colored progress fill
+   (driven by the --progress custom property, set inline per-slider) and a
+   thumb that only appears on hover/focus/active, matching the minimal
+   control-bar aesthetic instead of the browser's default slider chrome. */
+.aurex-range {
+  --progress: 0%;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    rgb(var(--accent)) var(--progress),
+    rgb(var(--border)) var(--progress)
+  );
+  cursor: pointer;
+  outline: none;
+  transition: height 120ms ease;
+}
+
+.aurex-range:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.aurex-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: rgb(var(--text));
+  border: none;
+  opacity: 0;
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.aurex-range:hover::-webkit-slider-thumb,
+.aurex-range:focus-visible::-webkit-slider-thumb,
+.aurex-range:active::-webkit-slider-thumb {
+  opacity: 1;
+}
+
+.aurex-range:active::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+
+.aurex-range::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: rgb(var(--text));
+  border: none;
+  opacity: 0;
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.aurex-range:hover::-moz-range-thumb,
+.aurex-range:focus-visible::-moz-range-thumb,
+.aurex-range:active::-moz-range-thumb {
+  opacity: 1;
+}
+
+.aurex-range:focus-visible {
+  box-shadow: 0 0 0 2px rgb(var(--bg-elevated)), 0 0 0 4px rgb(var(--accent) / 0.5);
+}
+
+.aurex-range.aurex-range-seek:hover {
+  height: 6px;
+}
+
+/* Liquid Glass: soft translucent track (instead of the flat opaque border
+   color) and a gentle accent glow around the thumb while interacting. */
+:root[data-theme="glass"] .aurex-range {
+  background: linear-gradient(
+    to right,
+    rgb(var(--accent)) var(--progress),
+    rgb(255 255 255 / 0.12) var(--progress)
+  );
+}
+
+:root[data-theme="glass"] .aurex-range::-webkit-slider-thumb {
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.4), 0 0 12px rgb(var(--accent) / 0.6);
+}
+
+:root[data-theme="glass"] .aurex-range::-moz-range-thumb {
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.4), 0 0 12px rgb(var(--accent) / 0.6);
+}
+
+/* Vertical band sliders for the 10-band equalizer (writing-mode: vertical-lr
+   on the input, see EqualizerSettings.tsx). Kept simpler than .aurex-range
+   (no hover-reveal thumb, no progress-fill gradient) since ten of these sit
+   side by side at a small size. */
+.aurex-range-vertical {
+  appearance: none;
+  width: 4px;
+  border-radius: 999px;
+  background: rgb(var(--border));
+  cursor: pointer;
+  outline: none;
+}
+
+.aurex-range-vertical:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.aurex-range-vertical:focus-visible {
+  box-shadow: 0 0 0 2px rgb(var(--bg-elevated)), 0 0 0 4px rgb(var(--accent) / 0.5);
+}
+
+.aurex-range-vertical::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgb(var(--accent));
+  border: none;
+}
+
+.aurex-range-vertical::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgb(var(--accent));
+  border: none;
+}
+
+/* Ambient animation for the audio-playback logo view (no video track to
+   render, so the screen would otherwise just be flat black). Kept to a
+   slow, subtle breathing scale plus a small equalizer-style pulse - no
+   flashy motion, per the brand's minimal aesthetic. */
+@keyframes aurex-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+
+.animate-aurex-breathe {
+  animation: aurex-breathe 3.2s ease-in-out infinite;
+}
+
+@keyframes aurex-eq {
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1); }
+}
+
+.animate-aurex-eq {
+  transform-origin: bottom;
+  animation: aurex-eq 1s ease-in-out infinite;
+}

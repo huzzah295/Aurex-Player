@@ -1,0 +1,80 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "Aurex Player",
+  "version": "1.0.0",
+  "identifier": "com.aurexplayer.player",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1420",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Aurex Player",
+        "width": 1100,
+        "height": 700,
+        "minWidth": 480,
+        "minHeight": 320,
+        "resizable": true,
+        "fullscreen": false,
+        "decorations": false,
+        "transparent": false,
+        "visible": false
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "publisher": "Muhammad Huzaifa Saeed",
+    "copyright": "Copyright © 2026 Muhammad Huzaifa Saeed",
+    "shortDescription": "Aurex Player - Premium Lightweight Media Player",
+    "externalBin": ["binaries/mpv"],
+    "resources": { "binaries/d3dcompiler_43.dll": "d3dcompiler_43.dll" },
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "fileAssociations": [
+      { "ext": ["mp4"], "name": "MP4 Video", "description": "MP4 Video File", "role": "Viewer" },
+      { "ext": ["mkv"], "name": "Matroska Video", "description": "MKV Video File", "role": "Viewer" },
+      { "ext": ["avi"], "name": "AVI Video", "description": "AVI Video File", "role": "Viewer" },
+      { "ext": ["mov"], "name": "QuickTime Video", "description": "MOV Video File", "role": "Viewer" },
+      { "ext": ["wmv"], "name": "Windows Media Video", "description": "WMV Video File", "role": "Viewer" },
+      { "ext": ["flv"], "name": "Flash Video", "description": "FLV Video File", "role": "Viewer" },
+      { "ext": ["webm"], "name": "WebM Video", "description": "WebM Video File", "role": "Viewer" },
+      { "ext": ["mpeg", "mpg"], "name": "MPEG Video", "description": "MPEG Video File", "role": "Viewer" },
+      { "ext": ["ts"], "name": "MPEG-TS Video", "description": "TS Video File", "role": "Viewer" },
+      { "ext": ["mp3"], "name": "MP3 Audio", "description": "MP3 Audio File", "role": "Viewer" },
+      { "ext": ["wav"], "name": "WAV Audio", "description": "WAV Audio File", "role": "Viewer" },
+      { "ext": ["flac"], "name": "FLAC Audio", "description": "FLAC Audio File", "role": "Viewer" },
+      { "ext": ["aac"], "name": "AAC Audio", "description": "AAC Audio File", "role": "Viewer" },
+      { "ext": ["ogg"], "name": "OGG Audio", "description": "OGG Audio File", "role": "Viewer" },
+      { "ext": ["opus"], "name": "Opus Audio", "description": "Opus Audio File", "role": "Viewer" },
+      { "ext": ["m4a"], "name": "M4A Audio", "description": "M4A Audio File", "role": "Viewer" }
+    ],
+    "windows": {
+      "nsis": {
+        "template": "nsis/installer.nsi",
+        "installerIcon": "icons/icon.ico",
+        "uninstallerIcon": "icons/icon.ico",
+        "headerImage": "nsis/header.bmp",
+        "uninstallerHeaderImage": "nsis/header-uninstall.bmp",
+        "sidebarImage": "nsis/sidebar.bmp",
+        "installMode": "perMachine",
+        "compression": "lzma"
+      }
+    },
+    "android": {
+      "debugApplicationIdSuffix": ".debug"
+    }
+  }
+}

@@ -1,0 +1,30 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Third-party mpv binary - 113MB, exceeds GitHub's 100MB per-file limit and
+# isn't source code anyway. Download it from https://github.com/shinchiro/mpv-winbuild-cmake/releases
+# (or your preferred mpv Windows build) and place it at src-tauri/binaries/mpv-x86_64-pc-windows-msvc.exe
+# before building.
+src-tauri/binaries/*.exe
