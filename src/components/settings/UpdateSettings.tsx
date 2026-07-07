@@ -16,7 +16,7 @@ const gridItem: Variants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.2, ease: "easeOut" } },
 };
 
-type Status = "idle" | "checking" | "upToDate" | "available" | "downloading" | "error";
+type Status = "idle" | "checking" | "upToDate" | "available" | "downloading" | "error" | "downloadError";
 
 /** Turns a shared store result (from a background check, or none yet) into this panel's initial status. */
 function statusFromStoredInfo(info: UpdateInfo | null): Status {
@@ -61,7 +61,7 @@ export function UpdateSettings() {
       await exit(0);
     } catch (err) {
       setErrorMessage(String(err));
-      setStatus("error");
+      setStatus("downloadError");
     }
   };
 
@@ -155,6 +155,25 @@ export function UpdateSettings() {
             >
               Couldn't check for updates: {errorMessage}
             </motion.p>
+          )}
+
+          {status === "downloadError" && (
+            <motion.div
+              key="download-error"
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              className="flex flex-col gap-2"
+            >
+              <p className="text-sm text-[rgb(var(--danger))]">{errorMessage}</p>
+              <button
+                onClick={() => void handleDownloadAndInstall()}
+                className="glass-btn w-fit rounded-md bg-[rgb(var(--accent))] px-3.5 py-2 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90"
+              >
+                Retry Download
+              </button>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>

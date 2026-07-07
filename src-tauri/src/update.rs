@@ -82,6 +82,22 @@ fn http_client() -> Result<reqwest::Client, String> {
         .map_err(|_| "client-build-failed".to_string())
 }
 
+/// A separate client (and much longer timeout) for the installer download
+/// itself - `reqwest`'s `.timeout()` covers the *entire* request including
+/// streaming the response body, not just establishing the connection.
+/// `http_client()`'s 10-second timeout is fine for `check_for_update`'s tiny
+/// JSON response, but a 30-40MB installer can easily take longer than that
+/// on anything short of a fast connection, causing the download to be cut
+/// off mid-transfer rather than failing fast the way a genuinely unreachable
+/// host would.
+fn download_http_client() -> Result<reqwest::Client, String> {
+    reqwest::Client::builder()
+        .user_agent("Aurex-Player-Updater")
+        .timeout(Duration::from_secs(300))
+        .build()
+        .map_err(|_| "client-build-failed".to_string())
+}
+
 /// Fetches the latest release, retrying once on a transient failure. Never
 /// surfaces raw HTTP/network error text - callers only see whether it
 /// succeeded, so `check_for_update` can decide on a single, friendly message
@@ -189,7 +205,7 @@ pub async fn download_and_install_update(download_url: String) -> Result<(), Str
         return Err("Refusing to download from an untrusted source.".to_string());
     }
 
-    let client = http_client()?;
+    let client = download_http_client()?;
     let bytes = client
         .get(&download_url)
         .send()
